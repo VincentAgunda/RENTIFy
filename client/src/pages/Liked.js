@@ -27,7 +27,7 @@ const Liked = () => {
                   <div>
                     <h2 className="text-lg font-semibold">{property.title}</h2>
                     <p className="text-gray-600">Location: {property.location}</p>
-                    <p className="text-gray-600">Price: ${property.price}</p>
+                    <p className="text-gray-600">Price: Ksh{property.price}</p>
                     <p className="text-gray-600">Rooms: {property.rooms}</p>
                   </div>
                 </div>

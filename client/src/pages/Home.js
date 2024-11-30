@@ -10,16 +10,16 @@ const mockHouses = [
   {
     _id: '1',
     title: 'Modern Apartment in City Center',
-    location: 'New York, USA',
-    price: '2500',
+    location: 'Parklands, Nairobi',
+    price: '25000',
     rooms: 2,
-    image: '/image/house1.jpg',
+    image: '/image/house1.png',
   },
   {
     _id: '2',
-    title: 'Luxury Villa with Sea View',
-    location: 'Malibu, CA',
-    price: '8000',
+    title: 'Essential Apartments',
+    location: 'Nairobi West, Nairobi',
+    price: '80000',
     rooms: 5,
     image: '/image/house2.png',
   },
@@ -28,24 +28,32 @@ const mockHouses = [
     title: 'Cozy Cottage in the Countryside',
     location: 'Austin, TX',
     price: '1800',
-    rooms: 3,
-    image: '/image/house3.jpg',
+    rooms: 1,
+    image: '/image/house3.png',
   },
   {
-    _id: '3',
-    title: 'Cozy Cottage in the Countryside',
-    location: 'Austin, TX',
-    price: '1800',
+    _id: '4',
+    title: 'Teshasha',
+    location: 'Lucky Summer,  Ruaraka',
+    price: '28000',
     rooms: 3,
-    image: '/image/house3.jpg',
+    image: '/image/house4.png',
   },
   {
-    _id: '3',
-    title: 'Cozy Cottage in the Countryside',
-    location: 'Austin, TX',
-    price: '1800',
+    _id: '5',
+    title: 'Emunyani',
+    location: 'Seasons, Kasasrani',
+    price: '35000',
     rooms: 3,
-    image: '/image/house3.jpg',
+    image: '/image/house5.png',
+  },
+  {
+    _id: '6',
+    title: 'Cornerstone Gardens',
+    location: 'Kamulu, Kasasrani',
+    price: '3400',
+    rooms: 3,
+    image: '/image/house6.png',
   },
 ];
 
@@ -177,16 +185,16 @@ const HouseCard = ({ house }) => {
       <div className="p-4">
         <h3 className="text-lg font-semibold">{house.title}</h3>
         <p className="text-gray-600">Location: {house.location}</p>
-        <p className="text-gray-600">Price: ${house.price}</p>
-        <p className="text-gray-600">Rooms: {house.rooms}</p>
+        <p className="text-gray-600">Price: KSh {house.price}</p>
+        <p className="text-gray-600">Bedrooms: {house.rooms}</p>
       </div>
 
       {/* Like Button */}
       <div className="absolute top-4 left-4 flex items-center">
         <button
           onClick={() => toggleLike(house)}
-          className={`text-[#6E3640] hover:text-opacity-80 transition-all ${
-            isLiked ? 'text-red-500' : ''
+          className={`text-[#6E3640] hover: transition-all ${
+            isLiked ? 'text-[#ff8f80]' : ''
           }`}
         >
           <FaRegHeart size={24} />
@@ -195,7 +203,7 @@ const HouseCard = ({ house }) => {
           <motion.span
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="ml-2 text-sm text-[#6E3640]"
+            className="ml-2 text-sm text-[#b60630]"
           >
             Liked
           </motion.span>
@@ -206,8 +214,8 @@ const HouseCard = ({ house }) => {
       <div className="absolute top-4 right-4 flex items-center">
         <button
           onClick={() => addToCart(house)}
-          className={`text-[#6E3640] hover:text-opacity-80 transition-all ${
-            isInCart ? 'text-green-500' : ''
+          className={`text-[#f2f4e4] hover:text-opacity-80 transition-all ${
+            isInCart ? 'text-[#FBEFEF]' : ''
           }`}
         >
           <MdOutlineShoppingCart size={24} />
@@ -216,7 +224,7 @@ const HouseCard = ({ house }) => {
           <motion.span
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="ml-2 text-sm text-[#6E3640]"
+            className="ml-2 text-sm text-[#b60630]"
           >
             In Cart
           </motion.span>

@@ -1,9 +1,11 @@
 import React from 'react';
 import { usePropertyContext } from '../context/PropertyContext';
-import { FaTrash } from 'react-icons/fa'; // Import FaTrash icon
+import { FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom'; // For navigation
 
 const Cart = () => {
   const { cart, removeFromCart } = usePropertyContext();
+  const navigate = useNavigate(); // Hook for navigation
 
   return (
     <div className="p-8 bg-gray-50 font-montserrat">
@@ -27,7 +29,7 @@ const Cart = () => {
                   <div>
                     <h2 className="text-lg font-semibold">{property.title}</h2>
                     <p className="text-gray-600">Location: {property.location}</p>
-                    <p className="text-gray-600">Price: ${property.price}</p>
+                    <p className="text-gray-600">Price: KSh {property.price}</p>
                     <p className="text-gray-600">Rooms: {property.rooms}</p>
                   </div>
                 </div>
@@ -36,10 +38,11 @@ const Cart = () => {
                     className="bg-[#b91c1c] text-white py-2 px-4 rounded-md hover:bg-red-700 transition-all"
                     onClick={() => removeFromCart(property._id)}
                   >
-                    <FaTrash size={20} /> {/* Using the FaTrash icon */}
+                    <FaTrash size={20} />
                   </button>
                   <button
                     className="bg-[#316286] text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-all"
+                    onClick={() => navigate(`/connect/${property._id}`)} // Navigate to the connect page
                   >
                     Connect to Property Owner
                   </button>

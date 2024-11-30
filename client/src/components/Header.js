@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";  // useNavigate for programmatic navigation
 import { usePropertyContext } from "../context/PropertyContext";
 import { useAuth } from "../context/AuthContext"; 
 import { FaBars, FaTimes, FaHeart, FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
@@ -7,6 +7,7 @@ import { FaBars, FaTimes, FaHeart, FaShoppingCart, FaUser, FaSignOutAlt } from "
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const navigate = useNavigate();  // Hook for navigation after logout
 
   const { cart, likedProperties } = usePropertyContext();
   const likedCount = likedProperties.length;
@@ -20,6 +21,12 @@ function Header() {
 
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout(); // Clear auth context and localStorage
+    setIsProfileMenuOpen(false); // Close the profile dropdown menu
+    navigate("/login"); // Redirect to the login page after logout
   };
 
   return (
@@ -105,7 +112,7 @@ function Header() {
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-40 py-2 z-10">
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 text-maroon"
                     >
                       <FaSignOutAlt className="inline mr-2" />

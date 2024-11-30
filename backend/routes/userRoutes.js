@@ -9,8 +9,12 @@ router.post('/login', loginUser);
 
 // Protected routes (authentication required)
 router.get('/dashboard', protect, (req, res) => {
-  // This route is protected and requires authentication
-  res.json({ message: 'Welcome to the dashboard!', userId: req.user.id });
+  // Check if the user is a landlord
+  if (req.user.role !== 'landlord') {
+    return res.status(403).json({ message: 'Access denied, landlords only' });
+  }
+
+  res.json({ message: 'Welcome to the dashboard, Landlord!', userId: req.user.id });
 });
 
 module.exports = router;

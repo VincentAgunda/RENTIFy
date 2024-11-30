@@ -39,7 +39,7 @@ function Login() {
         if (data.role === "landlord") {
           navigate("/dashboard");
         } else {
-          navigate("/");
+          navigate("/"); // Redirect tenants to the home page or another appropriate page
         }
       } else {
         setErrorMessage(data.message || "Login failed.");

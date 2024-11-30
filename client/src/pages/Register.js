@@ -3,21 +3,21 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
-  const [activeTab, setActiveTab] = useState('Buyer');
+  const [activeTab, setActiveTab] = useState('Tenant');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'client', // Default role
+    role: 'client', // Default to tenant
   });
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const opentab = (tabname) => {
-    setActiveTab(tabname);
+  const openTab = (tabName) => {
+    setActiveTab(tabName);
     setFormData((prevData) => ({
       ...prevData,
-      role: tabname === 'Buyer' ? 'client' : 'landlord',
+      role: tabName === 'Tenant' ? 'client' : 'landlord',
     }));
   };
 
@@ -29,7 +29,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, formData, {
+      const res = await axios.post('http://localhost:5000/api/users/register', formData, {
         headers: { 'Content-Type': 'application/json' },
       });
 
@@ -58,17 +58,17 @@ const SignUp = () => {
             <div className="md:w-[30%] w-[60%] flex items-center py-1">
               <p
                 className={`w-64 max-w-full py-2 border-2 flex items-center justify-center cursor-pointer font-medium ${
-                  activeTab === 'Buyer' ? 'bg-[#6E3640] text-white' : ''
+                  activeTab === 'Tenant' ? 'bg-[#6E3640] text-white' : ''
                 }`}
-                onClick={() => opentab('Buyer')}
+                onClick={() => openTab('Tenant')}
               >
                 Tenant
               </p>
               <p
                 className={`w-64 max-w-full py-2 border-2 flex items-center justify-center cursor-pointer font-medium ${
-                  activeTab === 'Seller' ? 'bg-[#6E3640] text-white' : ''
+                  activeTab === 'Landlord' ? 'bg-[#6E3640] text-white' : ''
                 }`}
-                onClick={() => opentab('Seller')}
+                onClick={() => openTab('Landlord')}
               >
                 Landlord
               </p>

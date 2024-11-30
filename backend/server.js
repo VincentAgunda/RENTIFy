@@ -30,6 +30,7 @@ app.use((req, res, next) => {
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
+  console.error(err.stack); // Log the error stack for debugging
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
@@ -38,4 +39,6 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

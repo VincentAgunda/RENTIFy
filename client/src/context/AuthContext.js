@@ -4,38 +4,37 @@ import axios from "axios";
 // Create the AuthContext
 const AuthContext = createContext();
 
-// Provide the AuthContext to children
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(() => {
-    // Retrieve user data from local storage on initialization
     const savedAuth = localStorage.getItem("auth");
     return savedAuth ? JSON.parse(savedAuth) : null;
   });
 
-  // Login function (example: using axios)
   const login = async (email, password) => {
     try {
       const response = await axios.post("/api/login", { email, password });
       const userData = { user: response.data.user, token: response.data.token };
       setAuth(userData);
 
-      // Store user data in local storage for persistence
+      // Store user data in local storage
       localStorage.setItem("auth", JSON.stringify(userData));
+      // Optionally set token in axios default headers for API calls
+      axios.defaults.headers.Authorization = `Bearer ${userData.token}`;
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
     }
   };
 
-  // Logout function
   const logout = () => {
     setAuth(null);
-    localStorage.removeItem("auth"); // Clear local storage on logout
+    localStorage.removeItem("auth");
+    // Remove token from axios headers as well
+    delete axios.defaults.headers.Authorization;
   };
 
-  // Optional: Automatically refresh the auth state if needed
   useEffect(() => {
-    // Example: You can add logic here to check token expiry and refresh tokens.
+    // Optionally, you can add a token refresh mechanism here if needed.
   }, []);
 
   return (
@@ -45,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Hook to use the AuthContext
+// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -54,5 +53,4 @@ export const useAuth = () => {
   return context;
 };
 
-// Export default (optional, for backward compatibility)
 export default AuthContext;
