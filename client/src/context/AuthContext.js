@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
+// Set the base URL for Axios
+axios.defaults.baseURL = "https://rentify-uxmp.onrender.com";
+
 // Create the AuthContext
 const AuthContext = createContext();
 
@@ -12,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("/api/login", { email, password });
+      const response = await axios.post("/api/users/login", { email, password });
       const userData = { user: response.data.user, token: response.data.token };
       setAuth(userData);
 
