@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); // Import CORS
-const connectDB = require('./config/db');
+const cors = require('cors');
+const connectDB = require('./config/db'); // Ensure path is correct
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
@@ -11,11 +11,16 @@ const houseRoutes = require('./routes/houseRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());  // Use CORS middleware to allow cross-origin requests
-app.use(express.json()); // Body parser to parse JSON requests
+app.use(cors());
+app.use(express.json());
 
 // Connect to MongoDB
 connectDB();
+
+// Base route (optional)
+app.get('/', (req, res) => {
+  res.send('API is running...');
+});
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -30,7 +35,7 @@ app.use((req, res, next) => {
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack); // Log the error stack for debugging
+  console.error(err.stack);
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,

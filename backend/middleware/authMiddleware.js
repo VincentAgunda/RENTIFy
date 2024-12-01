@@ -1,37 +1,41 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Middleware to protect routes with token-based authentication
 const protect = async (req, res, next) => {
   let token;
 
-  // Check if the token is in the Authorization header
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // Extract token from Authorization header
+      // Extract the token from the "Authorization" header
       token = req.headers.authorization.split(' ')[1];
 
-      // Verify the token using the secret key
+      // Verify token using JWT_SECRET
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Get the user from the database based on the decoded ID
-      const user = await User.findById(decoded.id).select('-password');
+      // Find the user by ID, excluding the password from the response
+      req.user = await User.findById(decoded.id).select('-password');
 
-      if (!user) {
+      if (!req.user) {
         return res.status(401).json({ message: 'User not found' });
       }
 
-      req.user = user; // Attach user data to the request object
-      next(); // Proceed to the next middleware or route handler
+      next(); // Proceed to the next middleware or route
     } catch (error) {
-      console.error('Token verification error:', error); // Log error details
+      console.error('Token verification error:', error.message);
+
+      // Handle specific JWT errors for clarity
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token expired. Please login again.' });
+      }
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Invalid token. Authorization denied.' });
+      }
+
       res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {
-    // If no token is provided in the Authorization header
-    res.status(401).json({ message: 'Not authorized, no token' });
+    res.status(401).json({ message: 'Not authorized, token missing' });
   }
 };
 

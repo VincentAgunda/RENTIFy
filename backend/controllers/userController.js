@@ -8,93 +8,78 @@ const User = require('../models/User');
 const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
-  // Validate inputs
   if (!name || !email || !password || !role) {
-    return res.status(400).json({ message: 'Please provide all required fields: name, email, password, and role.' });
+    return res.status(400).json({ message: 'All fields are required: name, email, password, and role.' });
   }
 
   try {
-    // Check if user already exists
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists with that email' });
+      return res.status(400).json({ message: 'User already exists with that email.' });
     }
 
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create the new user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role, // Save the role passed in the request body
+      role,
     });
 
     if (user) {
-      // Respond with user info and generated JWT token
       res.status(201).json({
         _id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,  // Send the role in the response
-        token: generateToken(user.id), // Include the token in the response
+        role: user.role,
+        token: generateToken(user.id, user.role),
       });
     } else {
-      res.status(400).json({ message: 'User registration failed. Invalid data.' });
+      res.status(400).json({ message: 'Invalid user data.' });
     }
   } catch (error) {
-    console.error('Error during registration:', error); // Log the error for debugging
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 };
 
-// @desc Authenticate a user (Login)
+// @desc Authenticate a user
 // @route POST /api/users/login
 // @access Public
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate inputs
   if (!email || !password) {
-    return res.status(400).json({ message: 'Please provide both email and password' });
+    return res.status(400).json({ message: 'Email and password are required.' });
   }
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials, user not found' });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.json({
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user.id, user.role),
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid email or password.' });
     }
-
-    // Compare the provided password with the stored hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials, password mismatch' });
-    }
-
-    // Respond with user info and JWT token
-    res.json({
-      _id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,  // Include the user's role
-      token: generateToken(user.id), // Generate and send token
-    });
   } catch (error) {
-    console.error('Error during login:', error); // Log the error for debugging
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 };
 
-// Helper function to generate JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',  // Set token expiration time (30 days)
+// Generate JWT with role included
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+    expiresIn: '30d',
   });
 };
 
