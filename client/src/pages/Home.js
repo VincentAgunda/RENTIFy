@@ -64,14 +64,14 @@ function Home() {
   useEffect(() => {
     fetchFeaturedHouses();
   }, []);
-
   const fetchFeaturedHouses = async () => {
     try {
       const res = await axios.get('/api/houses?featured=true');
-      setFeaturedHouses(res.data);
+      console.log(res.data); // Log the data to inspect its structure
+      setFeaturedHouses(res.data);  // Assuming res.data is an array
     } catch (error) {
       console.error('Error fetching featured houses:', error);
-      setFeaturedHouses(mockHouses);
+      setFeaturedHouses(mockHouses);  // Fallback to mock data if error occurs
     }
   };
 
