@@ -46,7 +46,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc Authenticate a user
+// @desc Authenticate a user (Login)
 // @route POST /api/users/login
 // @access Public
 const loginUser = async (req, res) => {

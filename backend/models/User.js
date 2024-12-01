@@ -18,8 +18,8 @@ const userSchema = mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: ['client', 'landlord'],  // Define roles as 'client' or 'landlord'
-      default: 'client',  // Default role is 'client'
+      enum: ['client', 'landlord'], // Define roles as 'client' or 'landlord'
+      default: 'client', // Default role is 'client'
     },
   },
   {

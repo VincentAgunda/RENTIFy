@@ -18,6 +18,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate the form data
     if (!formData.email || !formData.password) {
       setErrorMessage("Please fill out all fields.");
       setShowModal(true);
@@ -25,6 +26,9 @@ function Login() {
     }
 
     try {
+      // Log the form data for debugging
+      console.log("Form data:", formData);
+
       const res = await axios.post('http://localhost:5000/api/users/login', formData, {
         headers: { "Content-Type": "application/json" },
       });

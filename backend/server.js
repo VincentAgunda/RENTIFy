@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const connectDB = require('./config/db'); // Ensure path is correct
 
 // Import routes
@@ -11,7 +12,8 @@ const houseRoutes = require('./routes/houseRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:3000' })); // CORS for React frontend
+app.use(helmet()); // Security headers
 app.use(express.json());
 
 // Connect to MongoDB
@@ -39,6 +41,14 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     message: err.message || 'Internal Server Error',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  app.close(() => {
+    process.exit(1);
   });
 });
 
