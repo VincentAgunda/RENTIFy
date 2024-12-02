@@ -16,7 +16,7 @@ const getHouses = async (req, res) => {
     res.status(200).json(houses);
   } catch (error) {
     console.error('Error fetching houses:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Error fetching houses. Please try again later.' });
   }
 };
 
@@ -25,6 +25,11 @@ const getHouses = async (req, res) => {
 // @access Private
 const addHouse = async (req, res) => {
   const { name, location, price, description, featured } = req.body;
+
+  // Input validation
+  if (!name || !location || !price || !description) {
+    return res.status(400).json({ message: 'All fields are required: name, location, price, description.' });
+  }
 
   // Log the files for debugging purposes
   console.log("Uploaded files:", req.files);
@@ -48,7 +53,7 @@ const addHouse = async (req, res) => {
     res.status(201).json(newHouse);
   } catch (error) {
     console.error('Error creating house listing:', error);
-    res.status(400).json({ message: 'Error creating house listing' });
+    res.status(500).json({ message: 'Server error. Please try again later.' });
   }
 };
 
@@ -77,10 +82,10 @@ const deleteHouse = async (req, res) => {
 
     // Remove house document
     await house.remove();
-    res.status(200).json({ message: 'House and associated files removed' });
+    res.status(200).json({ message: 'House and associated files removed successfully' });
   } catch (error) {
     console.error('Error deleting house:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Error deleting house. Please try again later.' });
   }
 };
 

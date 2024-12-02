@@ -59,18 +59,13 @@ const server = app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on port ${process.env.PORT || 5000}`);
 });
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
+const shutdown = (signal) => {
+  console.log(`${signal} received, shutting down gracefully...`);
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
   });
-});
+};
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully...');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));

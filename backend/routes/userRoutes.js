@@ -11,10 +11,11 @@ router.post('/login', loginUser);
 // Protected route (only landlords can access)
 router.get('/dashboard', protect, (req, res) => {
   if (req.user.role !== 'landlord') {
-    return res.status(403).json({ message: 'Access denied, landlords only' });
+    return res.status(403).json({ message: 'Access denied. Landlords only.' });
   }
 
-  res.json({ message: 'Welcome to the dashboard, Landlord!', userId: req.user.id });
+  // Proceed with the request if the user is a landlord
+  return res.json({ message: 'Welcome to the dashboard, Landlord!', userId: req.user.id });
 });
 
 module.exports = router;

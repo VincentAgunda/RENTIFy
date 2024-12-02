@@ -4,26 +4,31 @@ const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Name is required'], // Custom error message
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email is required'], // Custom error message
       unique: true,
+      match: [/\S+@\S+\.\S+/, 'Email is not valid'], // Email format validation
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Password is required'], // Custom error message
+      minlength: [6, 'Password must be at least 6 characters long'], // Password length validation
     },
     role: {
       type: String,
-      required: true,
-      enum: ['client', 'landlord'], // Define roles as 'client' or 'landlord'
+      required: [true, 'Role is required'], // Custom error message
+      enum: {
+        values: ['client', 'landlord'],
+        message: 'Role must be either "client" or "landlord"', // Enum validation with custom message
+      },
       default: 'client', // Default role is 'client'
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically adds createdAt and updatedAt timestamps
   }
 );
 

@@ -2,38 +2,44 @@ const express = require('express');
 const { getHouses, addHouse, deleteHouse } = require('../controllers/houseController');
 const { protect } = require('../middleware/authMiddleware');
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage'); // Updated import
+const { GridFsStorage } = require('multer-gridfs-storage');
 const path = require('path');
 
 // Initialize the router
 const router = express.Router();
 
-// Create a GridFS storage engine
+// Create a GridFS storage engine for image uploads
 const storage = new GridFsStorage({
-  url: process.env.MONGO_URI,  // MongoDB connection URI (stored in environment variables)
+  url: process.env.MONGO_URI, // MongoDB URI from environment variables
   file: (req, file) => {
     return new Promise((resolve, reject) => {
-      // Define file information for storage in GridFS
+      // Specify file information to be saved in GridFS
       const fileInfo = {
-        bucketName: 'photos',  // GridFS bucket name for images
-        filename: Date.now() + path.extname(file.originalname), // Unique filename using timestamp
+        bucketName: 'photos', // Use 'photos' as the GridFS bucket for storing images
+        filename: `${Date.now()}${path.extname(file.originalname)}`, // Ensure each file has a unique name
       };
-      resolve(fileInfo);  // Resolve with file info to proceed with the upload
+      resolve(fileInfo); // Resolve the promise with file information
     });
   },
 });
 
-// Initialize multer with GridFS storage
+// Initialize multer with GridFS storage engine
 const upload = multer({ storage });
 
-// @route GET /api/houses -> Fetch all houses
+// @route GET /api/houses
+// @desc Get all houses, with optional filtering by featured status
+// @access Public
 router.route('/').get(getHouses);
 
-// @route POST /api/houses -> Add new house (requires authentication)
-// Use multer to handle image uploads (up to 10 images)
+// @route POST /api/houses
+// @desc Add a new house with image uploads
+// @access Private (protected by middleware)
+// Uploads up to 10 images
 router.route('/').post(protect, upload.array('images', 10), addHouse);
 
-// @route DELETE /api/houses/:id -> Delete a specific house (requires authentication)
+// @route DELETE /api/houses/:id
+// @desc Delete a specific house by ID (requires authentication)
+// @access Private
 router.route('/:id').delete(protect, deleteHouse);
 
 module.exports = router;
