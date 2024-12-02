@@ -52,7 +52,7 @@ function Header() {
       {/* Main Navigation */}
       <div className="bg-gray-100 shadow-md">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link to="/" className="text-maroon text-2xl font-bold">RENTIFy</Link>
+          <Link to="/" className="text-[#6E3640] text-2xl font-bold">RENTIFy</Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6 items-center">

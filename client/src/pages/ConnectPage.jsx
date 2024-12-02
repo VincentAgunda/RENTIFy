@@ -1,9 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const ConnectPage = () => {
   const { id } = useParams(); // Get the property ID from the URL
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState(null); // For success or error message
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Perform input validation (e.g., check if fields are empty)
+    if (!name || !email || !message) {
+      setStatus('Please fill in all fields.');
+      return;
+    }
+
+    // Prepare the form data
+    const formData = { name, email, message, propertyId: id };
+
+    try {
+      // Simulating API call to send message (replace with actual API endpoint)
+      const response = await fetch('/api/connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus('Your message has been sent successfully!');
+      } else {
+        setStatus('Something went wrong, please try again.');
+      }
+    } catch (error) {
+      setStatus('Error: Could not send message.');
+    }
+
+    // Clear the form fields
+    setName('');
+    setEmail('');
+    setMessage('');
+  };
 
   return (
     <motion.div
@@ -16,12 +57,25 @@ const ConnectPage = () => {
         <h1 className="text-2xl font-bold text-center mb-6">
           Connect with the Property Owner
         </h1>
-        <form className="space-y-4">
+        
+        {status && (
+          <p
+            className={`text-center mb-4 ${
+              status.includes('success') ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
+            {status}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700 font-medium">Your Name</label>
             <input
               type="text"
               placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-3 border rounded-md"
             />
           </div>
@@ -30,22 +84,24 @@ const ConnectPage = () => {
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border rounded-md"
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-medium">
-              Message to Owner
-            </label>
+            <label className="block text-gray-700 font-medium">Message to Owner</label>
             <textarea
               placeholder="Write your message here"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               className="w-full p-3 border rounded-md"
               rows="5"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-[#316286] text-white py-3 rounded-md hover:bg-blue-700 transition-all"
+            className="w-full bg-[#6E3640] text-white py-3 rounded-md hover:bg-blue-700 transition-all"
           >
             Send Message
           </button>
