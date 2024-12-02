@@ -13,6 +13,13 @@ export const AuthProvider = ({ children }) => {
     return savedAuth ? JSON.parse(savedAuth) : null;
   });
 
+  useEffect(() => {
+    if (auth?.token) {
+      // Set default Authorization header if token is available
+      axios.defaults.headers.Authorization = `Bearer ${auth.token}`;
+    }
+  }, [auth]);
+
   const login = async (email, password) => {
     try {
       const response = await axios.post("/api/users/login", { email, password });
@@ -21,23 +28,39 @@ export const AuthProvider = ({ children }) => {
 
       // Store user data in local storage
       localStorage.setItem("auth", JSON.stringify(userData));
-      // Optionally set token in axios default headers for API calls
+
+      // Set token in axios default headers for API calls
       axios.defaults.headers.Authorization = `Bearer ${userData.token}`;
     } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
+      console.error("Login failed:", error.response?.data?.message || error.message);
+      throw new Error(error.response?.data?.message || "An error occurred during login.");
     }
   };
 
   const logout = () => {
     setAuth(null);
     localStorage.removeItem("auth");
+
     // Remove token from axios headers as well
     delete axios.defaults.headers.Authorization;
   };
 
+  // Add Axios interceptor for handling token expiration
   useEffect(() => {
-    // Optionally, you can add a token refresh mechanism here if needed.
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        if (error.response?.status === 401) {
+          // Handle unauthorized errors (e.g., token expiration)
+          console.error("Token expired or unauthorized. Logging out...");
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup the interceptor when component unmounts
+    return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
   return (

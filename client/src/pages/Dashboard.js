@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaHome, FaPlusCircle, FaTrash } from 'react-icons/fa'; 
+import { FaHome, FaPlusCircle, FaTrash } from 'react-icons/fa';
 
 function Dashboard() {
   const [houses, setHouses] = useState([]);
@@ -12,18 +12,20 @@ function Dashboard() {
     bedrooms: '',
     bathrooms: '',
     others: '',
+    description: '',
     images: [],
   });
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const token = localStorage.getItem('authToken');
 
-  // Configure axios headers globally
+  // Configure Axios globally
+  axios.defaults.baseURL = 'https://rentify-uxmp.onrender.com'; // Updated base URL
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleImageChange = (e) => {
@@ -33,13 +35,12 @@ function Dashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.location || !formData.price || !formData.bedrooms || !formData.bathrooms) {
-      setErrorMessage('Please fill out all required fields.');
+    if (!formData.name || !formData.location || !formData.price || !formData.bedrooms || !formData.bathrooms || formData.images.length === 0) {
+      setErrorMessage('Please fill out all required fields and upload at least one image.');
       return;
     }
 
     try {
-      // Create FormData instance to append form data (including images)
       const formDataWithImages = new FormData();
       Object.keys(formData).forEach((key) => {
         if (key === 'images') {
@@ -49,31 +50,36 @@ function Dashboard() {
         }
       });
 
-      console.log('Form data being sent:', formDataWithImages);  // Log form data being sent
+      const response = await axios.post('/api/houses', formDataWithImages);
+      console.log('House created successfully:', response.data);
 
-      const response = await axios.post('http://localhost:5000/api/houses', formDataWithImages);
-
-      console.log('House created successfully:', response);  // Log response after posting
-
-      setFormData({ name: '', location: '', price: '', bedrooms: '', bathrooms: '', others: '', images: [] });
-      fetchHouses();
+      setFormData({
+        name: '',
+        location: '',
+        price: '',
+        bedrooms: '',
+        bathrooms: '',
+        others: '',
+        description: '',
+        images: [],
+      });
       setErrorMessage('');
+      fetchHouses();
     } catch (error) {
-      console.error('Error in handleSubmit:', error);  // Log error
+      console.error('Error in handleSubmit:', error);
       setErrorMessage('Error creating house listing.');
     }
   };
 
   const fetchHouses = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/houses');
+      const res = await axios.get('/api/houses');
       if (Array.isArray(res.data)) {
         setHouses(res.data);
       } else {
-        console.error("Fetched data is not an array", res.data);
-        setErrorMessage('Unexpected data format');
+        console.error('Fetched data is not an array:', res.data);
+        setErrorMessage('Unexpected data format.');
       }
-      console.log('Fetched houses:', res.data);
     } catch (error) {
       console.error('Error fetching houses:', error);
       setErrorMessage('Error fetching house listings.');
@@ -84,9 +90,10 @@ function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this house?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/houses/${id}`);
+      await axios.delete(`/api/houses/${id}`);
       fetchHouses();
     } catch (error) {
+      console.error('Error deleting house listing:', error);
       setErrorMessage('Error deleting house listing.');
     }
   };
@@ -96,14 +103,15 @@ function Dashboard() {
       fetchHouses();
     } else {
       setErrorMessage('You must be logged in to view listings.');
+      navigate('/login');
     }
-  }, [token]);
+  }, [token, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-10">My Dashboard</h1>
 
-      {/* Revenue & Stats */}
+      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center justify-between">
           <FaHome size={40} />
@@ -121,81 +129,25 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Add House Form */}
+      {/* Create Listing Form */}
       <h2 className="text-2xl font-semibold mb-4">Create a New House Listing</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-800 p-6 rounded-lg shadow-lg mb-12">
-        <input
-          type="text"
-          name="name"
-          placeholder="House Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={formData.price}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <input
-          type="number"
-          name="bedrooms"
-          placeholder="Bedrooms"
-          value={formData.bedrooms}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <input
-          type="number"
-          name="bathrooms"
-          placeholder="Bathrooms"
-          value={formData.bathrooms}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <input
-          type="text"
-          name="others"
-          placeholder="Other Rooms (optional)"
-          value={formData.others}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        ></textarea>
-        <input
-          type="file"
-          name="images"
-          multiple
-          onChange={handleImageChange}
-          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
-        />
-        <button type="submit" className="bg-[#6E3640] text-white py-3 px-6 rounded-md mt-4 w-full">
-          Add House
-        </button>
+        <input type="text" name="name" placeholder="House Name" value={formData.name} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <input type="number" name="price" placeholder="Price" value={formData.price} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <input type="number" name="bedrooms" placeholder="Bedrooms" value={formData.bedrooms} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <input type="number" name="bathrooms" placeholder="Bathrooms" value={formData.bathrooms} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <input type="text" name="others" placeholder="Other Rooms (optional)" value={formData.others} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white"></textarea>
+        <input type="file" name="images" multiple onChange={handleImageChange} className="w-full p-3 mb-4 rounded-md bg-gray-700 text-white" />
+        <button type="submit" className="bg-red-600 text-white py-3 px-6 rounded-md mt-4 w-full">Add House</button>
         {errorMessage && <p className="text-red-400 text-sm mt-2">{errorMessage}</p>}
       </form>
 
       {/* Houses List */}
       <h2 className="text-2xl font-semibold mb-4">Your Houses</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {Array.isArray(houses) && houses.length > 0 ? (
+        {houses.length > 0 ? (
           houses.map((house) => (
             <div key={house._id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
               <h3 className="text-lg font-bold">{house.name}</h3>
@@ -204,14 +156,11 @@ function Dashboard() {
               <p>Bedrooms: {house.bedrooms}</p>
               <p>Bathrooms: {house.bathrooms}</p>
               <p>Other Rooms: {house.others}</p>
-              {house.images && house.images.map((img, idx) => (
-                <img key={idx} src={`http://localhost:5000/uploads/${img}`} alt="House" className="w-full h-32 object-cover mt-4 rounded-lg" />
+              {house.images.map((img, idx) => (
+                <img key={idx} src={`https://rentify-uxmp.onrender.com/uploads/${img}`} alt="House" className="w-full h-32 object-cover mt-4 rounded-lg" />
               ))}
-              <button
-                onClick={() => handleDelete(house._id)}
-                className="bg-red-600 text-white py-2 px-4 rounded mt-4"
-              >
-                <FaTrash /> Delete
+              <button onClick={() => handleDelete(house._id)} className="bg-red-600 text-white py-2 px-4 rounded mt-4 flex items-center">
+                <FaTrash className="mr-2" /> Delete
               </button>
             </div>
           ))
