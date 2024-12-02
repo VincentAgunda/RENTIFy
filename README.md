@@ -1,4 +1,4 @@
-Deployed Link https://rentify-app-lmli.onrender.com
+Deployed Link https://rentify-2-dji3.onrender.com
 # Rentify
 
 Rentify is a user-friendly platform designed to simplify the rental process. By leveraging modern technologies and integrating AI capabilities, Rentify helps users efficiently search for rental properties, saving time and reducing the stress involved in finding a suitable place to live.
