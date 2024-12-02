@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db'); // Ensure path is correct
+const morgan = require('morgan'); // HTTP request logger
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
@@ -14,7 +15,8 @@ const app = express();
 // Middleware
 app.use(cors({ origin: 'http://localhost:3000' })); // CORS for React frontend
 app.use(helmet()); // Security headers
-app.use(express.json());
+app.use(express.json()); // Parse JSON bodies
+app.use(morgan('dev')); // Log HTTP requests (development mode)
 
 // Connect to MongoDB
 connectDB();
@@ -52,8 +54,23 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Graceful shutdown (handle termination signals)
+const server = app.listen(process.env.PORT || 5000, () => {
+  console.log(`Server running on port ${process.env.PORT || 5000}`);
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

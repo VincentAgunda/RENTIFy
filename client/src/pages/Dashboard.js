@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaHome, FaPlusCircle, FaTrash } from 'react-icons/fa'; // Removed FaMoneyCheck for total balance
+import { FaHome, FaPlusCircle, FaTrash } from 'react-icons/fa'; 
 
 function Dashboard() {
   const [houses, setHouses] = useState([]);
@@ -9,7 +9,9 @@ function Dashboard() {
     name: '',
     location: '',
     price: '',
-    description: '',
+    bedrooms: '',
+    bathrooms: '',
+    others: '',
     images: [],
   });
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,7 +33,7 @@ function Dashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.location || !formData.price) {
+    if (!formData.name || !formData.location || !formData.price || !formData.bedrooms || !formData.bathrooms) {
       setErrorMessage('Please fill out all required fields.');
       return;
     }
@@ -53,7 +55,7 @@ function Dashboard() {
 
       console.log('House created successfully:', response);  // Log response after posting
 
-      setFormData({ name: '', location: '', price: '', description: '', images: [] });
+      setFormData({ name: '', location: '', price: '', bedrooms: '', bathrooms: '', others: '', images: [] });
       fetchHouses();
       setErrorMessage('');
     } catch (error) {
@@ -65,10 +67,15 @@ function Dashboard() {
   const fetchHouses = async () => {
     try {
       const res = await axios.get('http://localhost:5000/api/houses');
-      setHouses(res.data);
-      console.log('Fetched houses:', res.data);  // Log fetched houses
+      if (Array.isArray(res.data)) {
+        setHouses(res.data);
+      } else {
+        console.error("Fetched data is not an array", res.data);
+        setErrorMessage('Unexpected data format');
+      }
+      console.log('Fetched houses:', res.data);
     } catch (error) {
-      console.error('Error fetching houses:', error);  // Log error
+      console.error('Error fetching houses:', error);
       setErrorMessage('Error fetching house listings.');
     }
   };
@@ -96,7 +103,7 @@ function Dashboard() {
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-10">My Dashboard</h1>
 
-      {/* Revenue & Stats (Removed Total Balance) */}
+      {/* Revenue & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg flex items-center justify-between">
           <FaHome size={40} />
@@ -141,6 +148,30 @@ function Dashboard() {
           onChange={handleChange}
           className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
         />
+        <input
+          type="number"
+          name="bedrooms"
+          placeholder="Bedrooms"
+          value={formData.bedrooms}
+          onChange={handleChange}
+          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
+        />
+        <input
+          type="number"
+          name="bathrooms"
+          placeholder="Bathrooms"
+          value={formData.bathrooms}
+          onChange={handleChange}
+          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
+        />
+        <input
+          type="text"
+          name="others"
+          placeholder="Other Rooms (optional)"
+          value={formData.others}
+          onChange={handleChange}
+          className="w-full p-3 mb-4 border border-gray-600 rounded-md bg-gray-700 text-white"
+        />
         <textarea
           name="description"
           placeholder="Description"
@@ -164,23 +195,29 @@ function Dashboard() {
       {/* Houses List */}
       <h2 className="text-2xl font-semibold mb-4">Your Houses</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {houses.map((house) => (
-          <div key={house._id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold">{house.name}</h3>
-            <p>Location: {house.location}</p>
-            <p>Price: ${house.price}</p>
-            <p>Description: {house.description}</p>
-            {house.images.map((img, idx) => (
-              <img key={idx} src={img} alt="House" className="w-full h-32 object-cover mt-4 rounded-lg" />
-            ))}
-            <button
-              onClick={() => handleDelete(house._id)}
-              className="bg-red-600 text-white py-2 px-4 rounded mt-4"
-            >
-              <FaTrash /> Delete
-            </button>
-          </div>
-        ))}
+        {Array.isArray(houses) && houses.length > 0 ? (
+          houses.map((house) => (
+            <div key={house._id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg font-bold">{house.name}</h3>
+              <p>Location: {house.location}</p>
+              <p>Price: Ksh {house.price}</p>
+              <p>Bedrooms: {house.bedrooms}</p>
+              <p>Bathrooms: {house.bathrooms}</p>
+              <p>Other Rooms: {house.others}</p>
+              {house.images && house.images.map((img, idx) => (
+                <img key={idx} src={`http://localhost:5000/uploads/${img}`} alt="House" className="w-full h-32 object-cover mt-4 rounded-lg" />
+              ))}
+              <button
+                onClick={() => handleDelete(house._id)}
+                className="bg-red-600 text-white py-2 px-4 rounded mt-4"
+              >
+                <FaTrash /> Delete
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No houses available to display</p>
+        )}
       </div>
     </div>
   );

@@ -67,13 +67,17 @@ function Home() {
   const fetchFeaturedHouses = async () => {
     try {
       const res = await axios.get('/api/houses?featured=true');
-      console.log(res.data); // Log the data to inspect its structure
-      setFeaturedHouses(res.data);  // Assuming res.data is an array
+      if (res.data && res.data.length > 0) {
+        setFeaturedHouses(res.data); // Only update if data exists
+      } else {
+        setFeaturedHouses(mockHouses); // Fallback to mock data if no data
+      }
     } catch (error) {
       console.error('Error fetching featured houses:', error);
-      setFeaturedHouses(mockHouses);  // Fallback to mock data if error occurs
+      setFeaturedHouses(mockHouses); // Use mock data on error
     }
   };
+  
 
   return (
     <div className="bg-[#8ba89a] font-montserrat">
