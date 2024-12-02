@@ -1,4 +1,4 @@
-const House = require('../models/House');
+const House = require('../api/House');
 const mongoose = require('mongoose');
 
 // @desc Get houses
